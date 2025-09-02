@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20' # 指定 Node.js 版本，请确保与你的项目兼容
-          cache-dependency-path: ' tauriapp/package-lock.json'
+          cache-dependency-path: 'tauriapp/package-lock.json'
 
       # 步骤 3: 安装 Rust 工具链 (Tauri 依赖)
       - name: Setup Rust
@@ -42,7 +42,7 @@ jobs:
       # 步骤 5: 安装项目依赖
       - name: Install dependencies
         run: npm install # 根据你的包管理器调整，如 yarn install 或 pnpm install
-        cache-dependency-path: ' tauriapp/package.json'
+        cache-dependency-path: 'tauriapp/package.json'
 
       # 步骤 6: 构建 Tauri 应用并生成 Windows 安装程序
       - name: Build Tauri app
