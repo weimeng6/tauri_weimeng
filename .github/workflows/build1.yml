@@ -37,7 +37,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './src-tauri -> target' # 缓存 Tauri 的 target 目录
+          workspaces: './tauriTest/tauriapp/src-tauri -> target' # 缓存 Tauri 的 target 目录
 
       # 步骤 5: 安装项目依赖
       - name: Install dependencies
