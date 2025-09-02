@@ -1,0 +1,60 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [ main ] # 指定触发分支，例如 main 或 master
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # 允许在 GitHub 界面上手动触发工作流
+
+jobs:
+  build-windows:
+    runs-on: windows-latest # 使用 Windows 构建环境
+
+    permissions:
+      contents: write # 赋予工作流写入仓库内容的权限，用于创建 Release（若需要）
+
+    steps:
+      # 步骤 1: 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 步骤 2: 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 指定 Node.js 版本，请确保与你的项目兼容
+          cache: 'npm' # 缓存 npm 依赖，可选 'yarn' 或 'pnpm'
+
+      # 步骤 3: 安装 Rust 工具链 (Tauri 依赖)
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable # 使用稳定的 Rust 工具链
+          targets: x86_64-pc-windows-msvc # 指定 Windows 目标
+
+      # 步骤 4: 缓存 Rust 构建产物以加速后续编译
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target' # 缓存 Tauri 的 target 目录
+
+      # 步骤 5: 安装项目依赖
+      - name: Install dependencies
+        run: npm install # 根据你的包管理器调整，如 yarn install 或 pnpm install
+
+      # 步骤 6: 构建 Tauri 应用并生成 Windows 安装程序
+      - name: Build Tauri app
+        run: npm run tauri build -- --verbose # 添加 --verbose 有助于调试
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 用于可能的 GitHub API 调用
+
+      # 步骤 7: 上传生成的安装程序作为工作流制品 (Artifact)
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: |
+            src-tauri/target/release/bundle/msi/*.msi # 上传 MSI 安装包
+            src-tauri/target/release/bundle/nsis/*.exe # 上传 NSIS 安装包
+          if-no-files-found: error # 如果未找到文件则报错
