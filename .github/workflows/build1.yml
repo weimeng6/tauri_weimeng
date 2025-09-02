@@ -42,7 +42,7 @@ jobs:
       # 步骤 5: 安装项目依赖
       - name: Install dependencies
         run: npm install # 根据你的包管理器调整，如 yarn install 或 pnpm install
-        cache-dependency-path: 'tauriapp/package.json'
+        working-directory: ./tauriapp
 
       # 步骤 6: 构建 Tauri 应用并生成 Windows 安装程序
       - name: Build Tauri app
