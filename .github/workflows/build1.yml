@@ -24,7 +24,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20' # 指定 Node.js 版本，请确保与你的项目兼容
-          cache: 'npm' # 缓存 npm 依赖，可选 'yarn' 或 'pnpm'
           cache-dependency-path: ' tauriapp/package-lock.json'
 
       # 步骤 3: 安装 Rust 工具链 (Tauri 依赖)
