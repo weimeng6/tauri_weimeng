@@ -1,42 +1,34 @@
-name: Build Tauri Windows EXE
-
+name: 'Build Tauri App on Windows'
 on:
   push:
-    branches:
-      - main  # 当推送到 main 分支时触发
-  pull_request:
-    branches:
-      - main  # 当有 Pull Request 请求合并到 main 分支时触发
+    branches: [ main ]
+  release:
+    types: [created]
 
 jobs:
-  build:
-    runs-on: windows-latest  # 使用最新的 Windows 环境
+  build-on-windows:
+    runs-on: windows-latest # 使用微软提供的Windows环境
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3  # 更新为 actions/checkout 的 v3
+    - uses: actions/checkout@v4
 
-    - name: Set up Rust
-      uses: actions/setup-rust@v1  # 使用 setup-rust@v1，确保使用稳定的版本
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
       with:
-        rust-version: stable  # 使用 Rust 的稳定版
+        toolchain: stable
+        targets: x86_64-pc-windows-msvc
 
-    - name: Install MinGW (for cross-compiling)
+    - name: Install dependencies (Windows)
       run: |
-        choco install mingw
-        rustup target add x86_64-pc-windows-gnu  # 添加 Windows 目标
+        choco install -y vcredist2022 webview2
 
-    - name: Install Dependencies
-      run: |
-        npm install -g pnpm
-        pnpm install  # 安装 Node.js 依赖
+    - name: Build the application
+      run: cargo tauri build --target x86_64-pc-windows-msvc --verbose
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build Tauri for Windows
-      run: |
-        cargo tauri build --release  # 编译 Tauri 项目
-
-    - name: Upload EXE as Artifact
-      uses: actions/upload-artifact@v3  # 使用 v3 版本
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
       with:
-        name: tauri-windows-exe
-        path: target/x86_64-pc-windows-gnu/release/tauri.exe  # 上传编译生成的 EXE 文件
+        name: Tauri-Windows-Build
+        path: src-tauri/target/x86_64-pc-windows-msvc/release/bundle/
