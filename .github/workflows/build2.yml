@@ -1,0 +1,41 @@
+name: Build Tauri Windows EXE
+
+on:
+  push:
+    branches:
+      - main  # 当推送到 main 分支时触发
+  pull_request:
+    branches:
+      - main  # 当有 Pull Request 请求合并到 main 分支时触发
+
+jobs:
+  build:
+    runs-on: windows-latest  # 使用最新的 Windows 环境
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3  # 更新为 actions/checkout 的 v3
+
+    - name: Set up Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  # 手动安装 Rust
+        rustup target add x86_64-pc-windows-gnu  # 添加 Windows 目标
+
+    - name: Install MinGW (for cross-compiling)
+      run: |
+        choco install mingw
+
+    - name: Install Dependencies
+      run: |
+        npm install -g pnpm
+        pnpm install  # 安装 Node.js 依赖
+
+    - name: Build Tauri for Windows
+      run: |
+        cargo tauri build --release  # 编译 Tauri 项目
+
+    - name: Upload EXE as Artifact
+      uses: actions/upload-artifact@v3  # 使用 v3 版本
+      with:
+        name: tauri-windows-exe
+        path: target/x86_64-pc-windows-gnu/release/tauri.exe  # 上传编译生成的 EXE 文件
