@@ -47,6 +47,7 @@ jobs:
       # 步骤 6: 构建 Tauri 应用并生成 Windows 安装程序
       - name: Build Tauri app
         run: npm run tauri build -- --verbose # 添加 --verbose 有助于调试
+        working-directory: ${{ github.workspace }}\tauriTest\tauriapp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 用于可能的 GitHub API 调用
 
